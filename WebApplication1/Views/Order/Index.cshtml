@@ -5,5 +5,25 @@
 
 <h2>Index</h2>
 
-@ViewBag.CustomerID
-@ViewBag.CustomerName
+@ViewBag.test
+<table>
+    <tr>
+        <td>客戶代號</td>
+        <td>客戶名稱</td>
+        <td>負責員工</td>
+    </tr>
+    @foreach (var item in (List<WebApplication1.Models.Class1>)ViewBag.Data)//ViewBag為動態型別 故需要轉換型態
+    {
+        <tr>
+            <td>@item.CustomerID</td>
+            <td>@item.CustomerName</td>
+            <td>@item.EmployeeName</td>
+        </tr>
+    }
+</table>
+
+<script type="text/javascript">
+    var msg = '@ViewBag.test';
+    alert(msg);
+    //alert("test");
+</script>

@@ -15,10 +15,13 @@ namespace WebApplication1.Controllers
         /// <returns></returns>
         public ActionResult Index()
         {
-            Models.OrderService orderService = new Models.OrderService();
+            /*Models.OrderService orderService = new Models.OrderService();
             var order = orderService.GetOrderById("123");
             ViewBag.CustomerID = order.CustomerID;
-            ViewBag.CustomerName = order.CustomerName;
+            ViewBag.CustomerName = order.CustomerName;*/
+            ViewBag.test = "test";
+            Models.OrderService orderService = new Models.OrderService();
+            ViewBag.Data = orderService.GetOrders();
             return View();
         }
         /// <summary>
@@ -37,8 +40,23 @@ namespace WebApplication1.Controllers
         [HttpPost()]
         public ActionResult InsertOrder(Models.Class1 order)
         {
-            return View("Index2");
+            //Models.OrderService orderService = new Models.OrderService();
+            //orderService.InsertOrder(order);
+            ViewBag.Desc = "ViewBag";
+            ViewData["Desc2"] = "VIewData";
+            TempData["Desc3"] = "TempData";
+            //return View("Index2");
+            return RedirectToAction("Index");
         }
+        [HttpGet()]
+        public JsonResult TestJson()
+        {
+            var result = new Models.Class1(); // 等於 var result = new Models.Order() { CustomerID = "GSS" , CustomerName = "瑞陽資訊" };
+            result.CustomerID = "GSS";
+            result.CustomerName = "瑞陽資訊";
+            return this.Json(result, JsonRequestBehavior.AllowGet); //方便Demo 故用 Get
+        }
+
 
     }
 }
