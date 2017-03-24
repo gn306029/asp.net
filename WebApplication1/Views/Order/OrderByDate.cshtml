@@ -1,0 +1,63 @@
+﻿@model WebApplication1.Models.IndexViewModel
+@*
+    saveArray[0] = "CustomerID："+OrderDetail.CustomerID;
+                saveArray[1] = "CustomerName："+OrderDetail.CustomerName;
+                saveArray[2] = "EmployeeID："+OrderDetail.EmployeeID;
+                saveArray[3] = "EmployeeName："+OrderDetail.EmployeeName;
+                saveArray[4] = "Freight："+OrderDetail.Freight;
+                saveArray[5] = "OrderDate："+OrderDetail.OrderDate;
+                saveArray[6] = "OrderID："+OrderDetail.OrderID;
+                saveArray[7] = "RequireDate："+OrderDetail.RequireDate;
+                saveArray[8] = "ShipAddres："+OrderDetail.ShipAddres;
+                saveArray[9] = "ShipCity："+OrderDetail.ShipCity;
+                saveArray[10] = "ShipCountry："+OrderDetail.ShipCountry;
+                saveArray[11] = "ShipName："+OrderDetail.ShipName;
+                saveArray[12] = "ShipperDate："+OrderDetail.ShippedDate;
+                saveArray[13] = "ShipperID："+OrderDetail.ShipperID;
+                saveArray[14] = "ShipperName："+OrderDetail.ShipperName;
+                saveArray[15] = "ShipPostalCode："+OrderDetail.ShipPostalCode;
+                saveArray[16] = "ShipRegion："+OrderDetail.ShipRegion;
+*@
+<table>
+    <tr>
+        <td>客戶編號</td>
+        <td>客戶姓名</td>
+        <td>員工編號</td>
+        <td>員工姓名</td>
+        <td>貨運Freight</td>
+        <td>訂購日期</td>
+        <td>訂單編號</td>
+        <td>要求日期</td>
+        <td>出貨地址</td>
+        <td>出貨城市</td>
+        <td>出貨國家</td>
+        <td>船名ShipName</td>
+        <td>出貨日期</td>
+        <td>出貨編號</td>
+        <td>出貨員姓名</td>
+        <td>出貨郵政編碼</td>
+        <td>出貨地區</td>
+    </tr>
+    @foreach (var str in ViewBag.List)
+    {
+        <tr>
+            <td>@str.CustomerID</td>
+            <td>@str.CustomerName</td>
+            <td>@str.EmployeeID</td>
+            <td>@str.EmployeeName</td>
+            <td>@str.Freight</td>
+            <td>@str.OrderDate</td>
+            <td>@str.OrderID</td>
+            <td>@str.RequireDate</td>
+            <td>@str.ShipAddres</td>
+            <td>@str.ShipCity</td>
+            <td>@str.ShipCountry</td>
+            <td>@str.ShipName</td>
+            <td>@str.ShippedDate</td>
+            <td>@str.ShipperID</td>
+            <td>@str.ShipperName</td>
+            <td>@str.ShipPostalCode</td>
+            <td>@str.ShipRegion</td>
+        </tr>
+    }
+</table>
