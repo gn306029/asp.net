@@ -18,7 +18,65 @@ namespace WebApplication1.Models
         /// </summary>
         public void InsertOrder(Models.Class1 order)
         {
-
+            string sql = @" Insert Into Sales.Orders
+                            (
+                                CustomerID,
+                                EmployeeID,
+                                OrderDate,
+                                RequireDdate,
+                                ShippedDate,
+                                ShipperId,
+                                Freight,
+                                ShipName,
+                                ShipAddress,
+                                ShipCity,
+                                ShipRegion,
+                                ShipPostalCode,
+                                ShipCountry
+                            )
+                            Values
+                            (
+                                @CustomerID,
+                                @EmployeeID,
+                                @OrderDate,
+                                @RequireDdate,
+                                @ShippedDate,
+                                @ShipperId,
+                                @Freight,
+                                @ShipName,
+                                @ShipAddress,
+                                @ShipCity,
+                                @ShipRegion,
+                                @ShipPostalCode,
+                                @ShipCountry
+                            )
+                            Select SCOPE_IDENTITY()
+                            ";
+            Boolean test = false;
+            Boolean test2 = false;
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter("@CustomerID", Convert.ToInt32(order.CustomerID)));
+                cmd.Parameters.Add(new SqlParameter("@EmployeeID", Convert.ToInt32(order.EmployeeID)));
+                cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate));
+                cmd.Parameters.Add(new SqlParameter("@RequireDdate", order.RequireDate));
+                cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate));
+                cmd.Parameters.Add(new SqlParameter("@ShipperId", Convert.ToInt32(order.ShipperID)));
+                cmd.Parameters.Add(new SqlParameter("@Freight", order.Freight));
+                cmd.Parameters.Add(new SqlParameter("@ShipName", order.ShipName));
+                cmd.Parameters.Add(new SqlParameter("@ShipAddress", order.ShipAddres));
+                cmd.Parameters.Add(new SqlParameter("@ShipCity", order.ShipCity));
+                cmd.Parameters.Add(new SqlParameter("@ShipRegion", order.ShipRegion));
+                cmd.Parameters.Add(new SqlParameter("@ShipPostalCode", order.ShipPostalCode));
+                cmd.Parameters.Add(new SqlParameter("@ShipCountry", order.ShipCountry));
+                if (cmd.ExecuteScalar().Equals("1"))//測試用
+                {
+                    test = true;
+                }
+                conn.Close();
+            }
         }
         /// <summary>
         /// 刪除訂單 
@@ -54,7 +112,7 @@ namespace WebApplication1.Models
                     INNER JOIN Sales.Shippers As D ON A.shipperid=D.shipperid
                     Where A.OrderID=@OrderID";
 
-            using(SqlConnection conn=new SqlConnection(this.GetDBConnectionString()))
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(sql, conn);
@@ -100,11 +158,11 @@ namespace WebApplication1.Models
             return result;
         }
 
-        private List<Models.Class1>MapOrderDataToList(DataTable orderData)
+        private List<Models.Class1> MapOrderDataToList(DataTable orderData)
         {
             List<Models.Class1> result = new List<Class1>();
 
-            foreach(DataRow row in orderData.Rows)
+            foreach (DataRow row in orderData.Rows)
             {
                 result.Add(new Class1()
                 {

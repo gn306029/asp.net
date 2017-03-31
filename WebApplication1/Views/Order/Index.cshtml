@@ -15,9 +15,21 @@
     <div>@Html.TextBox("txtOrderId")</div>
     <input type="submit" value="依ID查詢" />
 
-}  
+}
 
 @using (Html.BeginForm("OrderByDate", "Order"))
 {
     <input type="submit" value="依要求日期由近到遠取前10筆" />
 }
+
+@using (Ajax.BeginForm("InsertOrder", "Order", new AjaxOptions() { OnSuccess = "xx" }))
+{
+    <input type="submit" value="新增訂單1" />
+}
+
+<script type="text/javascript">
+    function xx(r) {
+
+        debugger;
+    }
+</script>

@@ -8,7 +8,7 @@
 @TempData["Desc3"]
 <h2>InsertOrder</h2>
 
-@using (Html.BeginForm()) 
+@using (Html.BeginForm("CreatOrder","Order")) 
 {
     @Html.AntiForgeryToken()
     
@@ -91,7 +91,7 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Freight, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Freight, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.Freight, new { htmlAttributes = new { @class = "form-control" , @value=0} })
                 @Html.ValidationMessageFor(model => model.Freight, "", new { @class = "text-danger" })
             </div>
         </div>
