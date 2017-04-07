@@ -10,7 +10,7 @@
 <div>訂單編號</div>
 
 
-@using (Html.BeginForm("MyAction", "Order"))
+@using (Html.BeginForm("GetOrderByID", "Order"))
 {
     <div>@Html.TextBox("txtOrderId")</div>
     <input type="submit" value="依ID查詢" />
@@ -24,7 +24,7 @@
 
 @using (Ajax.BeginForm("InsertOrder", "Order", new AjaxOptions() { OnSuccess = "xx" }))
 {
-    <input type="submit" value="新增訂單1" />
+    <input type="submit" value="新增訂單" />
 }
 
 <script type="text/javascript">

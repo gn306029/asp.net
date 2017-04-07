@@ -81,9 +81,19 @@ namespace WebApplication1.Models
         /// <summary>
         /// 刪除訂單 
         /// </summary>
-        public void DeleteOrderByID()
+        public void DeleteOrderByID(String OrderID)
         {
-
+            Boolean test = false;
+            string sql = "Delete From Sales.Orders Where OrderID = @OrderID";
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter("@OrderID",OrderID));
+                cmd.ExecuteScalar();
+                
+                conn.Close();
+            }
         }
         /// <summary>
         /// 修改訂單
@@ -125,6 +135,7 @@ namespace WebApplication1.Models
 
             return this.MapOrderDataToList(dt).FirstOrDefault();
         }
+
         /// <summary>
         /// 依需求日期由近到遠取得訂單
         /// </summary>
