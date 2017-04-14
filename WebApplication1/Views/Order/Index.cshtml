@@ -17,19 +17,7 @@
 
 }
 
-@using (Html.BeginForm("OrderByDate", "Order"))
-{
-    <input type="submit" value="依要求日期由近到遠取前10筆" />
-}
-
-@using (Ajax.BeginForm("InsertOrder", "Order", new AjaxOptions() { OnSuccess = "xx" }))
+@using (Html.BeginForm("InsertOrder", "Order"))
 {
     <input type="submit" value="新增訂單" />
 }
-
-<script type="text/javascript">
-    function xx(r) {
-
-        debugger;
-    }
-</script>

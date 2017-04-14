@@ -53,7 +53,6 @@ namespace WebApplication1.Models
                             Select SCOPE_IDENTITY()
                             ";
             Boolean test = false;
-            Boolean test2 = false;
             using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
             {
                 conn.Open();
@@ -81,9 +80,8 @@ namespace WebApplication1.Models
         /// <summary>
         /// 刪除訂單 
         /// </summary>
-        public void DeleteOrderByID(String OrderID)
+        public void DeleteOrderByID(string OrderID)
         {
-            Boolean test = false;
             string sql = "Delete From Sales.Orders Where OrderID = @OrderID";
             using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
             {
@@ -98,9 +96,38 @@ namespace WebApplication1.Models
         /// <summary>
         /// 修改訂單
         /// </summary>
-        public void UpdateOrder()
+        public void UpdateOrder(string OrderID,Class1 order)
         {
+            string sql = @"Update Sales.Orders set 
+                            CustomerID = @CustomerID,EmployeeID = @EmployeeID,
+                            OrderDate = @OrderDate,RequiredDate = @RequireDate,
+                            ShippedDate = @ShippedDate,ShipperID = @ShipperID,
+                            Freight = @Freight,ShipName = @ShipName,
+                            ShipAddress = @ShipAddress,ShipCity = @ShipCity,
+                            ShipRegion = @ShipRegion,ShipPostalCode = @ShipPostalCode,ShipCountry = @ShipCountry
+                            Where OrderID = @OrderID";
 
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter("@OrderID", OrderID));
+                cmd.Parameters.Add(new SqlParameter("@CustomerID", Convert.ToInt32(order.CustomerID)));
+                cmd.Parameters.Add(new SqlParameter("@EmployeeID", Convert.ToInt32(order.EmployeeID)));
+                cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate));
+                cmd.Parameters.Add(new SqlParameter("@Requiredate", order.RequireDate));
+                cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate));
+                cmd.Parameters.Add(new SqlParameter("@ShipperId", Convert.ToInt32(order.ShipperID)));
+                cmd.Parameters.Add(new SqlParameter("@Freight", order.Freight));
+                cmd.Parameters.Add(new SqlParameter("@ShipName", order.ShipName));
+                cmd.Parameters.Add(new SqlParameter("@ShipAddress", order.ShipAddres));
+                cmd.Parameters.Add(new SqlParameter("@ShipCity", order.ShipCity));
+                cmd.Parameters.Add(new SqlParameter("@ShipRegion", order.ShipRegion));
+                cmd.Parameters.Add(new SqlParameter("@ShipPostalCode", order.ShipPostalCode));
+                cmd.Parameters.Add(new SqlParameter("@ShipCountry", order.ShipCountry));
+                cmd.ExecuteScalar();
+                conn.Close();
+            }
         }
         /// <summary>
         /// 依照id取得訂單
@@ -134,39 +161,6 @@ namespace WebApplication1.Models
             }
 
             return this.MapOrderDataToList(dt).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// 依需求日期由近到遠取得訂單
-        /// </summary>
-        /// <returns></returns>
-        public List<Models.Class1> GetOrderByRequireDate()
-        {
-            List<Models.Class1> result = new List<Class1>();
-            DataTable dt = new DataTable();
-            string sql = @"Select Top 10 with ties
-                    A.OrderId,A.CustomerID,B.Companyname As CustName,
-                    A.EmployeeID,C.lastname+C.firstname As EmpName,
-                    A.OrderDate,A.RequireDdate,A.ShippedDate,
-                    A.ShipperId,D.companyname As ShipperName,A.Freight,
-                    A.ShipName,A.ShipAddress,A.ShipCity,A.ShipRegion,A.ShipPostalCode,A.ShipCountry
-                    From Sales.Orders As A
-                    INNER JOIN Sales.Customers As B ON A.CustomerID=B.CustomerID
-                    INNER JOIN HR.Employees As C ON A.EmployeeID=C.EmployeeID
-                    INNER JOIN Sales.Shippers As D ON A.shipperid=D.shipperid
-					Order by RequiredDate";
-
-            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
-            {
-                conn.Open();
-                SqlCommand cmd = new SqlCommand(sql, conn);
-
-                SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
-                sqlAdapter.Fill(dt);
-                conn.Close();
-            }
-            result = MapOrderDataToList(dt);
-            return result;
         }
 
         private List<Models.Class1> MapOrderDataToList(DataTable orderData)

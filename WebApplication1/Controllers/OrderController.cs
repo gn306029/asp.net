@@ -78,6 +78,7 @@ namespace WebApplication1.Controllers
             Models.OrderService orderservice = new Models.OrderService();
             orderservice.InsertOrder(OrderDetail);
 
+            
             ViewBag.one = OrderID;
             ViewBag.two = CustomerID;
             ViewBag.three = EmployeeID;
@@ -119,25 +120,82 @@ namespace WebApplication1.Controllers
         }
 
         /// <summary>
-        /// 依要求日期由近到遠取得前10筆訂單
+        /// 依 OrderID 刪除訂單
         /// </summary>
+        /// <param name="OrderID"></param>
         /// <returns></returns>
-        [HttpPost()]
-        public ActionResult OrderByDate()
-        {
-            Models.OrderService orderService = new Models.OrderService();
-            List<Models.Class1> OrderDetail = new List<Models.Class1>();
-            OrderDetail = orderService.GetOrderByRequireDate();
-            ViewBag.List = OrderDetail;
-            return View();
-        }
-
         [HttpPost()]
         public ActionResult DeleteOrder(string OrderID)
         {
             Models.OrderService orderService = new Models.OrderService();
             orderService.DeleteOrderByID(OrderID);
             return View();
+        }
+
+
+        [HttpPost()]
+        public ActionResult UpdateOrder(string OrderID, string CustomerID, string EmployeeID, DateTime OrderDate, DateTime RequireDate,
+                                       DateTime ShippedDate, string ShipperID, string Freight, string ShipName, string ShipAddres, string ShipCity, string ShipRegion, string ShipPostalCode, string ShipCountry)
+        {
+            Models.Class1 OrderDetail = new Models.Class1();
+            OrderDetail.CustomerID = CustomerID;
+            OrderDetail.EmployeeID = EmployeeID;
+            OrderDetail.OrderDate = OrderDate;
+            OrderDetail.RequireDate = RequireDate;
+            OrderDetail.ShippedDate = ShippedDate;
+            OrderDetail.ShipperID = ShipperID;
+            OrderDetail.Freight = Convert.ToDecimal(Freight);
+            OrderDetail.ShipName = ShipName;
+            OrderDetail.ShipAddres = ShipAddres;
+            OrderDetail.ShipCity = ShipCity;
+            OrderDetail.ShipRegion = ShipRegion;
+            OrderDetail.ShipPostalCode = ShipPostalCode;
+            OrderDetail.ShipCountry = ShipCountry;
+            Models.OrderService orderService = new Models.OrderService();
+            orderService.UpdateOrder(OrderID, OrderDetail);
+            return View();
+        }
+
+        /// <summary>
+        /// 取得訂單資料，要塞進框框裡，看使用者要更新哪個
+        /// </summary>
+        /// <param name="OrderID"></param>
+        /// <returns></returns>
+        [HttpPost()]
+        public ActionResult GetOrderDetail(string OrderID)
+        {
+            Models.OrderService orderService = new Models.OrderService();
+            ViewBag.OrderDetail = orderService.GetOrderById(OrderID);
+            
+            string[] Date = (ViewBag.OrderDetail.OrderDate + "").Split(' ');
+            ViewBag.OrderDate = convertDate(Date[0]);
+            Date = (ViewBag.OrderDetail.RequireDate + "").Split(' ');
+            ViewBag.RequireDate = convertDate(Date[0]);
+            Date = (ViewBag.OrderDetail.ShippedDate + "").Split(' ');
+            ViewBag.ShippedDate = convertDate(Date[0]);
+            //ViewBag.OrderDetail.OrderDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
+            //ViewBag.OrderDetail.RequireDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
+            //ViewBag.OrderDetail.ShippedDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
+            return View();
+        }
+
+        /// <summary>
+        /// 轉換成我要的日期格式
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private string convertDate(string date)
+        {
+            string[] save = date.Split('/');
+            if (save[1].Length==1)
+            {
+                save[1] = "0"+save[1];
+            }
+            if (save[2].Length==1)
+            {
+                save[2] = "0" + save[2];
+            }
+            return save[0] + "-" + save[1] + "-" + save[2];
         }
     }
 }

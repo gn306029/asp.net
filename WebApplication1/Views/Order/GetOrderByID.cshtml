@@ -25,9 +25,18 @@
 
     using (Html.BeginForm("DeleteOrder", "Order"))
     {
-        <input type="hidden" name="OrderID" value=@ViewBag.Save.OrderID />
-        <input type="submit" value="刪除這筆資料" />
+        <input type="hidden"  name="OrderID" value=@ViewBag.Save.OrderID />
+        <input type="submit" value="刪除資料" />
     }
+
+    using (Html.BeginForm("GetOrderDetail", "Order"))
+    {
+        <input type="hidden" name="OrderID" value=@ViewBag.Save.OrderID />
+        <input type="submit" value="更新資料" />
+    }
+
+
+
 }
 catch (Exception e)
 {
@@ -35,5 +44,6 @@ catch (Exception e)
         沒有這個 ID 呦
     </div>
 }
+
 
 
