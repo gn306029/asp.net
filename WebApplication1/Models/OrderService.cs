@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Data;
 using System.Data.SqlClient;
+using System.Web.Mvc;
 
 namespace WebApplication1.Models
 {
@@ -87,16 +88,16 @@ namespace WebApplication1.Models
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.Add(new SqlParameter("@OrderID",OrderID));
+                cmd.Parameters.Add(new SqlParameter("@OrderID", OrderID));
                 cmd.ExecuteScalar();
-                
+
                 conn.Close();
             }
         }
         /// <summary>
         /// 修改訂單
         /// </summary>
-        public void UpdateOrder(string OrderID,Class1 order)
+        public void UpdateOrder(string OrderID, Class1 order)
         {
             string sql = @"Update Sales.Orders set 
                             CustomerID = @CustomerID,EmployeeID = @EmployeeID,
@@ -128,6 +129,137 @@ namespace WebApplication1.Models
                 cmd.ExecuteScalar();
                 conn.Close();
             }
+        }
+        public Models.Class1 GetOrderDetail(string orderID)
+        {
+            DataTable dt = new DataTable();
+            string sql = @"Select * From Sales.OrderDetails Where OrderID = @orderID";
+            using(SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.Add(new SqlParameter("@OrderId", orderID));
+
+                    SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
+                    sqlAdapter.Fill(dt);
+                    conn.Close();
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+            return this.MapOrderDataToList_2(dt).FirstOrDefault();
+        }
+        private List<Models.Class1> MapOrderDataToList_2(DataTable orderData)
+        {
+            List<Models.Class1> result = new List<Class1>();
+
+            foreach (DataRow row in orderData.Rows)
+            {
+                result.Add(new Class1()
+                {
+                    OrderID = row["OrderId"].ToString() == null?"": row["OrderId"].ToString(),
+                    ProductID = row["ProductID"].ToString()==null?"": row["ProductID"].ToString(),
+                    UnitPrice = Convert.ToDecimal(row["UnitPrice"]==null?"0": row["UnitPrice"]),
+                    Qty = Convert.ToInt32(row["Qty"] == null ? "0" : row["Qty"]),
+                    Discount = Convert.ToDecimal(row["Discount"] == null ? "0" : row["Discount"])
+                });
+            }
+            return result;
+        }
+        /// <summary>
+        /// 取得產品名稱
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectListItem> GetProductName()
+        {
+            List<SelectListItem> ProductName = new List<SelectListItem>();
+            string sql2 = @"Select ProductID From Sales.Order Where OrderID = @OrderID";
+
+            
+            string sql = @"Select ProductName From Production.Products";
+            ProductName.Add(new SelectListItem { Text = "------", Value = "" });
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                    while (sqlDataReader.Read())
+                    {
+                        ProductName.Add(new SelectListItem { Text = sqlDataReader[0].ToString(), Value = sqlDataReader[0].ToString() });
+                    }
+                    conn.Close();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                }
+            }
+            return ProductName;
+        }
+        /// <summary>
+        /// 取得員工名稱
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectListItem> GetOrderEmployee()
+        {
+            List<SelectListItem> Employee_name = new List<SelectListItem>();
+            string sql = @"Select lastname+firstname From HR.Employees";
+            Employee_name.Add(new SelectListItem { Text = "------", Value = "" });
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                    while (sqlDataReader.Read())
+                    {
+                        Employee_name.Add(new SelectListItem { Text = sqlDataReader[0].ToString(), Value = sqlDataReader[0].ToString() });
+                    }
+                    conn.Close();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                }
+            }
+            return Employee_name;
+        }
+        /// <summary>
+        /// 取得貨運公司
+        /// </summary>
+        /// <returns></returns>
+        public List<SelectListItem> GetOrderShipper()
+        {
+
+            List<SelectListItem> Shipper = new List<SelectListItem>();
+            string sql = @"Select companyname From Sales.Shippers";
+            Shipper.Add(new SelectListItem { Text = "------", Value = "" });
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                try
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                    while (sqlDataReader.Read())
+                    {
+                        Shipper.Add(new SelectListItem { Text = sqlDataReader[0].ToString(), Value = sqlDataReader[0].ToString() });
+                    }
+                    conn.Close();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                }
+            }
+            return Shipper;
         }
         /// <summary>
         /// 依照id取得訂單
@@ -161,6 +293,57 @@ namespace WebApplication1.Models
             }
 
             return this.MapOrderDataToList(dt).FirstOrDefault();
+        }
+        /// <summary>
+        /// 依照條件取得訂單
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public List<Models.Class1> GetOrderByCondition(Models.Class1 order)
+        {
+            DataTable dt = new DataTable();
+            string sql = @"Select
+                    A.OrderId,A.CustomerID,B.Companyname As CustName,
+                    A.EmployeeID,C.lastname+C.firstname As EmpName,
+                    A.OrderDate,A.RequireDdate,A.ShippedDate,
+                    A.ShipperId,D.companyname As ShipperName,A.Freight,
+                    A.ShipName,A.ShipAddress,A.ShipCity,A.ShipRegion,A.ShipPostalCode,A.ShipCountry
+                    From Sales.Orders As A
+                    INNER JOIN Sales.Customers As B ON A.CustomerID=B.CustomerID
+                    INNER JOIN HR.Employees As C ON A.EmployeeID=C.EmployeeID
+                    INNER JOIN Sales.Shippers As D ON A.shipperid=D.shipperid
+                    Where A.OrderID Like '%'+@OrderID+'%'
+                    And B.Companyname Like '%'+@CustomerName+'%'
+                    And (C.LastName+FirstName) Like '%'+@EmployeeName+'%' And D.CompanyName Like '%'+@ShipperName+'%' 
+                    And A.OrderDate Like '%'+@OrderDate+'%'
+                    And A.RequiredDate Like '%'+@RequireDate+'%'
+                    And A.ShippedDate Like '%'+@ShippedDate+'%'
+                    ";
+
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID));
+                cmd.Parameters.Add(new SqlParameter("@CustomerName", order.CustomerName == null ? "" : order.CustomerName));
+                cmd.Parameters.Add(new SqlParameter("@EmployeeName", order.EmployeeName == null ? "" : order.EmployeeName));
+                cmd.Parameters.Add(new SqlParameter("@ShipperName", order.ShipperName == null ? "" : order.ShipperName));
+                cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate == null ? "" : order.OrderDate + ""));
+                cmd.Parameters.Add(new SqlParameter("@RequireDate", order.RequireDate == null ? "" : order.RequireDate + ""));
+                cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate == null ? "" : order.ShippedDate + ""));
+                /*cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID));
+                cmd.Parameters.Add(new SqlParameter("@CustomerName", order.CustomerName == null ? "%%" : "%"+order.CustomerName+"%"));
+                cmd.Parameters.Add(new SqlParameter("@EmployeeName", order.EmployeeName));
+                cmd.Parameters.Add(new SqlParameter("@ShipperName", order.ShipperName));
+                cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate== null ? "%%" : "%"+order.OrderDate+"%"));
+                cmd.Parameters.Add(new SqlParameter("@RequireDate", order.RequireDate == null ? "%%" : "%"+order.RequireDate+"%"));
+                cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate == null ? "%%" : "%"+order.ShippedDate+"%"));*/
+                SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
+                sqlAdapter.Fill(dt);
+                conn.Close();
+            }
+
+            return this.MapOrderDataToList(dt);
         }
 
         private List<Models.Class1> MapOrderDataToList(DataTable orderData)

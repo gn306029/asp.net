@@ -16,7 +16,8 @@ namespace WebApplication1.Controllers
         public ActionResult Index()
         {
             Models.OrderService orderService = new Models.OrderService();
-            orderService.GetOrderById("10250");
+            ViewBag.ShipperName = orderService.GetOrderShipper();
+            ViewBag.EmployeeName = orderService.GetOrderEmployee();
             return View();
         }
 
@@ -28,14 +29,9 @@ namespace WebApplication1.Controllers
         [HttpPost()]
         public ActionResult InsertOrder()
         {
-            //Models.OrderService orderService = new Models.OrderService();
-            //orderService.InsertOrder(order);
-            ViewBag.Desc = "ViewBag";
-            ViewData["Desc2"] = "VIewData";
-            TempData["Desc3"] = "TempData";
-
+            Models.OrderService orderService = new Models.OrderService();
+            //ViewBag.ProductName = orderService.GetProductName();
             return View();
-            //return RedirectToAction("Index");
         }
         /// <summary>
         /// 新增訂單資訊
@@ -57,8 +53,8 @@ namespace WebApplication1.Controllers
         /// <param name="ShipCountry"></param>
         /// <returns></returns>
         [HttpPost()]
-        public ActionResult CreatOrder(string OrderID,string CustomerID,string EmployeeID,string CustomerName,DateTime OrderDate,DateTime RequireDate,
-                                       DateTime ShippedDate,string ShipperID,string Freight,string ShipName,string ShipAddres,string ShipCity,string ShipRegion,string ShipPostalCode,string ShipCountry)
+        public ActionResult CreatOrder(string OrderID, string CustomerID, string EmployeeID, string CustomerName, DateTime OrderDate, DateTime RequireDate,
+                                       DateTime ShippedDate, string ShipperID, string Freight, string ShipName, string ShipAddres, string ShipCity, string ShipRegion, string ShipPostalCode, string ShipCountry)
         {
             Models.Class1 OrderDetail = new Models.Class1();
             OrderDetail.CustomerID = CustomerID;
@@ -78,7 +74,7 @@ namespace WebApplication1.Controllers
             Models.OrderService orderservice = new Models.OrderService();
             orderservice.InsertOrder(OrderDetail);
 
-            
+
             ViewBag.one = OrderID;
             ViewBag.two = CustomerID;
             ViewBag.three = EmployeeID;
@@ -89,14 +85,14 @@ namespace WebApplication1.Controllers
             ViewBag.eight = ShipperID;
             ViewBag.nine = Freight;
             ViewBag.ten = ShipName;
-            ViewBag.eleven = ShipAddres+" \r\n";
+            ViewBag.eleven = ShipAddres + " \r\n";
             ViewBag.twelve = ShipRegion;
             ViewBag.threeten = ShipPostalCode;
             ViewBag.fourten = ShipCountry;
 
             return View();
         }
-        
+
 
 
         /// <summary>
@@ -105,18 +101,12 @@ namespace WebApplication1.Controllers
         /// <param name="button"></param>
         /// <returns></returns>
         [HttpPost()]
-        public ActionResult GetOrderByID(string txtOrderId)
+        public ActionResult GetOrderByCondition(Models.Class1 order)
         {
             Models.OrderService orderService = new Models.OrderService();
-            try
-            {
-                ViewBag.Save = orderService.GetOrderById(txtOrderId);
-                return View();
-            }catch(Exception e)
-            {
-                ViewBag.Error = "沒有這個ID呦";
-                return View();
-            }
+            ViewBag.Save = orderService.GetOrderByCondition(order);
+            ViewBag.model = order;
+            return View();
         }
 
         /// <summary>
@@ -134,25 +124,10 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost()]
-        public ActionResult UpdateOrder(string OrderID, string CustomerID, string EmployeeID, DateTime OrderDate, DateTime RequireDate,
-                                       DateTime ShippedDate, string ShipperID, string Freight, string ShipName, string ShipAddres, string ShipCity, string ShipRegion, string ShipPostalCode, string ShipCountry)
+        public ActionResult UpdateOrder(Models.Class1 order)
         {
-            Models.Class1 OrderDetail = new Models.Class1();
-            OrderDetail.CustomerID = CustomerID;
-            OrderDetail.EmployeeID = EmployeeID;
-            OrderDetail.OrderDate = OrderDate;
-            OrderDetail.RequireDate = RequireDate;
-            OrderDetail.ShippedDate = ShippedDate;
-            OrderDetail.ShipperID = ShipperID;
-            OrderDetail.Freight = Convert.ToDecimal(Freight);
-            OrderDetail.ShipName = ShipName;
-            OrderDetail.ShipAddres = ShipAddres;
-            OrderDetail.ShipCity = ShipCity;
-            OrderDetail.ShipRegion = ShipRegion;
-            OrderDetail.ShipPostalCode = ShipPostalCode;
-            OrderDetail.ShipCountry = ShipCountry;
             Models.OrderService orderService = new Models.OrderService();
-            orderService.UpdateOrder(OrderID, OrderDetail);
+            orderService.UpdateOrder(order.OrderID, order);
             return View();
         }
 
@@ -165,17 +140,17 @@ namespace WebApplication1.Controllers
         public ActionResult GetOrderDetail(string OrderID)
         {
             Models.OrderService orderService = new Models.OrderService();
+            //取得 Order 資料
             ViewBag.OrderDetail = orderService.GetOrderById(OrderID);
-            
+            //取得 OrderDetail 資料
+            ViewBag.OrderDetail2 = orderService.GetOrderDetail(OrderID);
+            ViewBag.ProductName = orderService.GetProductName();
             string[] Date = (ViewBag.OrderDetail.OrderDate + "").Split(' ');
             ViewBag.OrderDate = convertDate(Date[0]);
             Date = (ViewBag.OrderDetail.RequireDate + "").Split(' ');
             ViewBag.RequireDate = convertDate(Date[0]);
             Date = (ViewBag.OrderDetail.ShippedDate + "").Split(' ');
             ViewBag.ShippedDate = convertDate(Date[0]);
-            //ViewBag.OrderDetail.OrderDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
-            //ViewBag.OrderDetail.RequireDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
-            //ViewBag.OrderDetail.ShippedDate = (DateTime)(ViewBag.OrderDetail.OrderDate.ToString("yyyy-MM-dd"));
             return View();
         }
 
@@ -187,11 +162,11 @@ namespace WebApplication1.Controllers
         private string convertDate(string date)
         {
             string[] save = date.Split('/');
-            if (save[1].Length==1)
+            if (save[1].Length == 1)
             {
-                save[1] = "0"+save[1];
+                save[1] = "0" + save[1];
             }
-            if (save[2].Length==1)
+            if (save[2].Length == 1)
             {
                 save[2] = "0" + save[2];
             }

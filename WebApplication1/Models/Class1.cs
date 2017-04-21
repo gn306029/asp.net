@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models
 {
+    [MetadataType(typeof(Class1))]
     public class Class1
     {
         /// <summary>
@@ -30,5 +33,14 @@ namespace WebApplication1.Models
         public String ShipRegion { get; set; }
         public String ShipPostalCode { get; set; }
         public String ShipCountry { get; set; }
+
+        /// <summary>
+        /// 訂單明細用
+        /// </summary>
+        public string ProductName { get; set; }
+        public string ProductID { get; set; }
+        public Decimal UnitPrice { get; set; }
+        public int Qty { get; set; }
+        public Decimal Discount { get; set; }
     }
 }

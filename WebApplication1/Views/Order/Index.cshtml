@@ -1,19 +1,38 @@
-﻿
+﻿@model WebApplication1.Models.Class1
 @{
     ViewBag.Title = "Index";
 }
-
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <h2>Index</h2>
 
-@ViewBag.test
-@ViewBag.TestWord
 <div>訂單編號</div>
 
 
-@using (Html.BeginForm("GetOrderByID", "Order"))
+@using (Html.BeginForm("GetOrderByCondition", "Order" ))
 {
-    <div>@Html.TextBox("txtOrderId")</div>
-    <input type="submit" value="依ID查詢" />
+    @Html.AntiForgeryToken()
+
+    @Html.EditorFor(model => model.OrderID, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessageFor(model => model.OrderID)
+    <div>客戶名稱</div>
+    @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessageFor(model => model.CustomerName)
+    <div>負責員工</div>
+    @Html.DropDownList("EmployeeName",ViewBag.Employee_name as SelectList)
+    @Html.ValidationMessageFor(model => model.EmployeeName)
+    <div>貨運公司</div>
+    @Html.DropDownList("ShipperName", ViewBag.Shipper as SelectList)
+    @Html.ValidationMessageFor(model => model.ShipName)
+    <div>訂購日期</div>
+    @Html.EditorFor(model => model.OrderDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.OrderDate)
+    <div>出貨日期</div>
+    @Html.EditorFor(model => model.ShippedDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.ShippedDate)
+    <div>需求名稱</div>
+    @Html.EditorFor(model => model.RequireDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.RequireDate)
+    <input type="submit" id="search" value="查詢" />
 
 }
 
@@ -21,3 +40,5 @@
 {
     <input type="submit" value="新增訂單" />
 }
+
+<div id="content"></div>
