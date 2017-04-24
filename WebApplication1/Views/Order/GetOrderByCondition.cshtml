@@ -24,43 +24,103 @@ public String OrderID { get; set; }
         public String ShipPostalCode { get; set; }
         public String ShipCountry { get; set; }
 -->
-@{
-    var model = @ViewBag.model;
-    Console.Write(model);
-}
-<table class="table table-striped">
-    <tr><td id="OrderID">訂單編號</td><td id="CustomerName">客戶姓名</td><td id="EmployeeName">負責員工</td><td id="OrderDate">訂購日期</td><td id="RequireDate">需要日期</td><td id="ShipperDate">出貨日期</td><td></td><td></td></tr>
-    @for (int i = 0; i < @ViewBag.Save.Count; i++)
-    {
+<div id="content">
+    <table class="table table-striped">
+        <tr><td id="OrderID_table">訂單編號</td><td id="CustomerName">客戶姓名</td><td id="EmployeeName">負責員工</td><td id="OrderDate">訂購日期</td><td id="RequireDate">需要日期</td><td id="ShipperDate">出貨日期</td><td></td><td></td></tr>
+        @for (int i = 0; i < @ViewBag.Save.Count; i++)
+        {
 
-        <tr>
-            <td>@ViewBag.Save[i].OrderID</td>
-            <td>@ViewBag.Save[i].CustomerName</td>
-            <td>@ViewBag.Save[i].EmployeeName</td>
-            <td>@ViewBag.Save[i].OrderDate</td>
-            <td>@ViewBag.Save[i].RequireDate</td>
-            <td>@ViewBag.Save[i].ShippedDate</td>
-            <td>
-                @using (Html.BeginForm("DeleteOrder", "Order"))
-                {
-                    <input type="hidden" name="OrderID" value=@ViewBag.Save[i].OrderID />
-                        <input type="submit" value="刪除" />
-                }
-            </td>
-            <td>
-                @using (Html.BeginForm("GetOrderDetail", "Order"))
-                {
-                    <input type="hidden" name="OrderID" value=@ViewBag.Save[i].OrderID />
-                        <input type="submit" value="更新" />
-                }
-            </td>
-        </tr>
-    }
-</table>
+            <tr>
+                <td>@ViewBag.Save[i].OrderID</td>
+                <td><div >@ViewBag.Save[i].CustomerName</div></td>
+                <td><div >@ViewBag.Save[i].EmployeeName</div></td>
+                <td><div >@ViewBag.Save[i].OrderDate</div></td>
+                <td><div >@ViewBag.Save[i].RequireDate</div></td>
+                <td><div >@ViewBag.Save[i].ShippedDate</div></td>
+                <td>
+                    <div class="content_Delete">
+                        @using (Html.BeginForm("DeleteOrder", "Order"))
+                        {
+                            <input type="hidden" name="OrderID" value=@ViewBag.Save[i].OrderID />
+                            <input type="submit" value="刪除" />
+                        }
+                    </div>
+                </td>
+                <td>
+                    <div class="content_Update">
+                        @using (Html.BeginForm("GetOrderDetail", "Order"))
+                        {
+                            <input type="hidden" name="OrderID" value=@ViewBag.Save[i].OrderID />
+                            <input type="submit" value="更新" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+<input type="hidden" id="OrderID_title" value=@ViewBag.Condition.OrderID />
+<input type="hidden" id="CustomerName_title" value=@ViewBag.Condition.CustomerName />
+<input type="hidden" id="EmployeeName_title" value=@ViewBag.Condition.EmployeeName />
+<input type="hidden" id="ShipperName_title" value=@ViewBag.First_shipperName@ViewBag.Second_shipperName />
+<input type="hidden" id="OrderDate_title" value=@ViewBag.Condition.OrderDate />
+<input type="hidden" id="ShippedDate_title" value=@ViewBag.Condition.ShippedDate />
+<input type="hidden" id="RequireDate_title" value=@ViewBag.Condition.RequireDate />
 
 <script>
-    $("#OrderID").click(function () {
-        alert("Hello");
-        alert(@ViewBag.model+"");
+    $("body").on("click","#OrderID_table2",function () {
+        alert("OK");
+    })
+    $("#OrderID_table").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "/Order/AjaxMethod",
+            data: {
+                "OrderID": $("#OrderID_title").val(),
+                "CustomerName": $("#CustomerName_title").val(),
+                "EmployeeName": $("#EmployeeName_title").val(),
+                "ShipperName": $("#ShipperName_title").val(),
+                "OrderDate": $("#OrderDate_title").val(),
+                "ShippedDate": $("#ShippedDate_title").val(),
+                "RequireDate": $("#RequireDate_title").val()
+            },
+            success: function (response) {
+                //用JSON格式回傳
+                $("#content").empty();
+                var text = "<table class=\"table table-striped\">";
+                text += "<tr><td id=\"OrderID_table2\">訂單編號</td><td id=\"CustomerName\">客戶姓名</td><td id=\"EmployeeName\">負責員工</td><td id=\"OrderDate\">訂購日期</td><td id=\"RequireDate\">需要日期</td><td id=\"ShipperDate\">出貨日期</td><td></td><td></td></tr>";
+                for (var i = 0; i < response.length; i++) {
+                    text += "<tr>";
+                    text += "<td>" + response[i].OrderID + "</td>";
+                    text += "<td>" + response[i].CustomerName + "</td>";
+                    text += "<td>" + response[i].EmployeeName + "</td>";
+                    var date = new Date(parseInt(response[i].OrderDate.substring(6, response[0].OrderDate.length - 2)));
+                    var time = date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                    text += "<td>" + time + "</td>";
+                    var date = new Date(parseInt(response[0].OrderDate.substring(6, response[0].OrderDate.length - 2)));
+                    var time = date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                    text += "<td>" + time + "</td>";
+                    var date = new Date(parseInt(response[0].OrderDate.substring(6, response[0].OrderDate.length - 2)));
+                    var time = date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                    text += "<td>" + time + "</td>";
+                    text += "<td><form action=\"/Order/GetOrderDetail\" method=\"post\">"
+                    text += "<input type=\"hidden\" name=\"OrderID\" value=" + response[i].OrderID + "/>";
+                    text += "<input type=\"submit\" value=更新>";
+                    text += "</form></td>";
+                    text += "<td><form action=\"/Order/DeleteOrder\" method=\"post\">"
+                    text += "<input type=\"hidden\" name=\"OrderID\" value=" + response[i].OrderID + "/>";
+                    text += "<input type=\"submit\" value=刪除>";
+                    text += "</form></td>";
+                    text += "</tr>";
+                }
+                text += "</table>";
+                $("#content").html(text);
+            },
+            failure: function () {
+                alert("fail");
+            }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest.readyState + XMLHttpRequest.status + XMLHttpRequest.responseText);
+            }
+        })
     })
 </script>
