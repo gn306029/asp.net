@@ -93,10 +93,8 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-
-
         /// <summary>
-        /// 依ID取得訂單
+        /// 依條件取得訂單
         /// </summary>
         /// <param name="button"></param>
         /// <returns></returns>
@@ -104,6 +102,19 @@ namespace WebApplication1.Controllers
         public ActionResult GetOrderByCondition(Models.Class1 order)
         {
             Models.OrderService orderService = new Models.OrderService();
+            //有空格的字放到value裡會讓value的值只取到前面 所以暫時先這樣做
+            try
+            {
+                string[] shipperName = order.ShipperName.Split(' ');
+                ViewBag.First_shipperName = shipperName[0];
+                ViewBag.Second_shipperName = shipperName[1];
+            }
+            catch (Exception e)
+            {
+                ViewBag.First_shipperName = "S";
+                ViewBag.Second_shipperName = " ";
+            }
+            ViewBag.Condition = order;
             ViewBag.Save = orderService.GetOrderByCondition(order);
             ViewBag.model = order;
             return View();
@@ -124,10 +135,10 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost()]
-        public ActionResult UpdateOrder(Models.Class1 order)
+        public ActionResult UpdateOrder(Models.Class1 order,string[] ProductID,string[] UnitPrice , string[] Qty, string[] Discount)
         {
             Models.OrderService orderService = new Models.OrderService();
-            orderService.UpdateOrder(order.OrderID, order);
+            orderService.UpdateOrder(order.OrderID, order,ProductID,UnitPrice,Qty,Discount);
             return View();
         }
 
@@ -139,21 +150,63 @@ namespace WebApplication1.Controllers
         [HttpPost()]
         public ActionResult GetOrderDetail(string OrderID)
         {
+            OrderID = OrderID.Replace("/","");
             Models.OrderService orderService = new Models.OrderService();
             //取得 Order 資料
-            ViewBag.OrderDetail = orderService.GetOrderById(OrderID);
+            ViewBag.Order = orderService.GetOrderById(OrderID);
             //取得 OrderDetail 資料
-            ViewBag.OrderDetail2 = orderService.GetOrderDetail(OrderID);
+            ViewBag.OrderDetail = orderService.GetOrderDetail(OrderID);
+            //所有的產品名稱
             ViewBag.ProductName = orderService.GetProductName();
-            string[] Date = (ViewBag.OrderDetail.OrderDate + "").Split(' ');
+            //所有的產品編號
+            ViewBag.ProductID = orderService.GetProductID();
+            //該筆訂單的產品名稱
+            ViewBag.OrderProductName = orderService.GetOrderProductName(OrderID);
+            string[] Date = (ViewBag.Order.OrderDate + "").Split(' ');
             ViewBag.OrderDate = convertDate(Date[0]);
-            Date = (ViewBag.OrderDetail.RequireDate + "").Split(' ');
+            Date = (ViewBag.Order.RequireDate + "").Split(' ');
             ViewBag.RequireDate = convertDate(Date[0]);
-            Date = (ViewBag.OrderDetail.ShippedDate + "").Split(' ');
+            Date = (ViewBag.Order.ShippedDate + "").Split(' ');
             ViewBag.ShippedDate = convertDate(Date[0]);
             return View();
         }
 
+        [HttpPost()]
+        public JsonResult AjaxMethod(string OrderID, string CustomerName, string EmployeeName, string ShipperName, string OrderDate, string ShippedDate, string RequireDate)
+        {
+            DateTime datetime;
+            Models.OrderService orderService = new Models.OrderService();
+            Models.Class1 order = new Models.Class1();
+            order.OrderID = OrderID;
+            order.CustomerName = CustomerName;
+            order.EmployeeName = EmployeeName;
+            order.ShipperName = ShipperName;
+            if (OrderDate != "") {
+                order.OrderDate = Convert.ToDateTime(OrderDate);
+            }else
+            {
+                order.OrderDate = null;
+            }
+            if (OrderDate != "")
+            {
+                order.ShippedDate = Convert.ToDateTime(ShippedDate);
+            }
+            else
+            {
+                order.ShippedDate = null;
+            }
+            if (OrderDate != "")
+            {
+                order.RequireDate = Convert.ToDateTime(RequireDate);
+            }
+            else
+            {
+                order.RequireDate = null;
+            }
+            List<Models.Class1> data = orderService.AjaxGetOrderByCondition(order,"ASC");
+            var jsonData = Json(data, JsonRequestBehavior.AllowGet);
+            return jsonData;
+        }
         /// <summary>
         /// 轉換成我要的日期格式
         /// </summary>
