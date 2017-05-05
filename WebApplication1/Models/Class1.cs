@@ -7,8 +7,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models
 {
-    [MetadataType(typeof(Class1))]
-    public class Class1
+    [MetadataType(typeof(Order))]
+    public class Order
     {
         /// <summary>
         /// 訂單編號

@@ -17,7 +17,7 @@ namespace WebApplication1.Models
         /// <summary>
         /// 新增訂單
         /// </summary>
-        public void InsertOrder(Models.Class1 order)
+        public void InsertOrder(Models.Order order, string[] ProductID, string[] UnitPrice, string[] Qty, string[] Discount)
         {
             string sql = @" Insert Into Sales.Orders
                             (
@@ -77,13 +77,53 @@ namespace WebApplication1.Models
                 }
                 conn.Close();
             }
+            sql = @"Select Top 1 OrderID From Sales.Orders Order by OrderID Desc";
+            string OrderID = "";
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                SqlDataReader sqlDataReader = cmd.ExecuteReader();
+                while (sqlDataReader.Read())
+                {
+                    OrderID = sqlDataReader[0].ToString();
+                }
+                conn.Close();
+            }
+            for (int i = 0; i < ProductID.Length; i++)
+            {
+                sql = @"Insert into Sales.OrderDetails(OrderID , ProductID , UnitPrice , Qty , Discount) Values (@OrderID , @ProductID ,@UnitPrice , @Qty , @Discount)";
+                using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+
+                    cmd.Parameters.Add(new SqlParameter("@OrderID", OrderID));
+                    cmd.Parameters.Add(new SqlParameter("@ProductID", ProductID[i] == null ? "1" : ProductID[i]));
+                    cmd.Parameters.Add(new SqlParameter("@UnitPrice", UnitPrice[i] == null ? "1" : UnitPrice[i]));
+                    cmd.Parameters.Add(new SqlParameter("@Qty", Qty[i] == null ? "1" : Qty[i]));
+                    cmd.Parameters.Add(new SqlParameter("@Discount", Discount[i] == null ? "0.000" : Discount[i]));
+                    cmd.ExecuteScalar();
+
+                    conn.Close();
+                }
+            }
         }
         /// <summary>
         /// 刪除訂單 
         /// </summary>
         public void DeleteOrderByID(string OrderID)
         {
-            string sql = "Delete From Sales.Orders Where OrderID = @OrderID";
+            string sql = "Delete From Sales.OrderDetails Where OrderID = @OrderID";
+            using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand(sql, conn);
+                cmd.Parameters.Add(new SqlParameter("@OrderID", OrderID));
+                cmd.ExecuteScalar();
+                conn.Close();
+            }
+            sql = "Delete From Sales.Orders Where OrderID = @OrderID";
             using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
             {
                 conn.Open();
@@ -97,7 +137,7 @@ namespace WebApplication1.Models
         /// <summary>
         /// 修改訂單
         /// </summary>
-        public void UpdateOrder(string OrderID, Class1 order, string[] ProductID, string[] UnitPrice, string[] Qty, string[] Discount)
+        public void UpdateOrder(string OrderID, Order order, string[] ProductID, string[] UnitPrice, string[] Qty, string[] Discount)
         {
             string sql_detail = @"Delete From Sales.OrderDetails Where OrderID = @OrderID";
             using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
@@ -162,7 +202,7 @@ namespace WebApplication1.Models
                 conn.Close();
             }
         }
-        public List<Models.Class1> GetOrderDetail(string orderID)
+        public List<Models.Order> GetOrderDetail(string orderID)
         {
             DataTable dt = new DataTable();
             string sql = @"Select * From Sales.OrderDetails Where OrderID = @orderID";
@@ -185,13 +225,13 @@ namespace WebApplication1.Models
             }
             return this.MapOrderDataToList_2(dt);
         }
-        private List<Models.Class1> MapOrderDataToList_2(DataTable orderData)
+        private List<Models.Order> MapOrderDataToList_2(DataTable orderData)
         {
-            List<Models.Class1> result = new List<Class1>();
+            List<Models.Order> result = new List<Order>();
 
             foreach (DataRow row in orderData.Rows)
             {
-                result.Add(new Class1()
+                result.Add(new Order()
                 {
                     OrderID = row["OrderId"].ToString() == null ? "" : row["OrderId"].ToString(),
                     ProductID = row["ProductID"].ToString() == null ? "" : row["ProductID"].ToString(),
@@ -351,7 +391,7 @@ namespace WebApplication1.Models
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public Models.Class1 GetOrderById(string orderid)
+        public Models.Order GetOrderById(string orderid)
         {
             DataTable dt = new DataTable();
             string sql = @"Select
@@ -385,7 +425,7 @@ namespace WebApplication1.Models
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
-        public List<Models.Class1> AjaxGetOrderByCondition(Models.Class1 order,string A_D)
+        public List<Models.Order> AjaxGetOrderByCondition(Models.Order order, string A_D)
         {
             DataTable dt = new DataTable();
             string sql = @"Select
@@ -404,14 +444,14 @@ namespace WebApplication1.Models
                     And A.OrderDate Like '%'+@OrderDate+'%'
                     And A.RequiredDate Like '%'+@RequireDate+'%'
                     And A.ShippedDate Like '%'+@ShippedDate+'%'
-                    Order By A.OrderID ASC
+                    Order By A.OrderID DESC
                     ";
 
             using (SqlConnection conn = new SqlConnection(this.GetDBConnectionString()))
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID));
+                cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID == null ? "" : order.OrderID));
                 cmd.Parameters.Add(new SqlParameter("@CustomerName", order.CustomerName == null ? "" : order.CustomerName));
                 cmd.Parameters.Add(new SqlParameter("@EmployeeName", order.EmployeeName == null ? "" : order.EmployeeName));
                 cmd.Parameters.Add(new SqlParameter("@ShipperName", order.ShipperName == null ? "" : order.ShipperName));
@@ -431,7 +471,7 @@ namespace WebApplication1.Models
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public List<Models.Class1> GetOrderByCondition(Models.Class1 order)
+        public List<Models.Order> GetOrderByCondition(Models.Order order)
         {
             DataTable dt = new DataTable();
             string sql = @"Select
@@ -456,7 +496,7 @@ namespace WebApplication1.Models
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(sql, conn);
-                cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID));
+                cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID == null ? "" : order.OrderID));
                 cmd.Parameters.Add(new SqlParameter("@CustomerName", order.CustomerName == null ? "" : order.CustomerName));
                 cmd.Parameters.Add(new SqlParameter("@EmployeeName", order.EmployeeName == null ? "" : order.EmployeeName));
                 cmd.Parameters.Add(new SqlParameter("@ShipperName", order.ShipperName == null ? "" : order.ShipperName));
@@ -478,13 +518,13 @@ namespace WebApplication1.Models
             return this.MapOrderDataToList(dt);
         }
 
-        private List<Models.Class1> MapOrderDataToList(DataTable orderData)
+        private List<Models.Order> MapOrderDataToList(DataTable orderData)
         {
-            List<Models.Class1> result = new List<Class1>();
+            List<Models.Order> result = new List<Order>();
 
             foreach (DataRow row in orderData.Rows)
             {
-                result.Add(new Class1()
+                result.Add(new Order()
                 {
                     CustomerID = row["CustomerID"].ToString(),
                     CustomerName = row["CustName"].ToString(),

@@ -1,5 +1,5 @@
-﻿@model WebApplication1.Models.Class1
-
+﻿@model WebApplication1.Models.Order
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 @using (Html.BeginForm("UpdateOrder", "Order"))
 {
 
@@ -121,10 +121,9 @@
                 @Html.ValidationMessageFor(model => model.ShipCountry, "", new { @class = "text-danger" })
             </div>
         </div>
-
-        <div id="OrderDetail">
+        <div>
             <h4>訂單明細</h4>
-            <table>
+            <table id="OrderDetail">
                 <tr>
                     <td>@Html.LabelFor(model => model.ProductName, htmlAttributes: new { @class = "control-label col-md-2" })</td>
                     <td>@Html.LabelFor(model => model.UnitPrice, htmlAttributes: new { @class = "control-label col-md-2" })</td>
@@ -135,7 +134,7 @@
                 {
                     <tr>
                         <td>
-                            <select name="ProductID[]">
+                            <select id="ProductID_Array" name="ProductID[]">
                                 @for (int j = 0; j < ViewBag.ProductID.Count; j++)
                                 {
                                     if (@ViewBag.ProductID[j] == ViewBag.OrderDetail[i].ProductID)
@@ -150,26 +149,65 @@
                             </select>
                         </td>
                         <td>
-                            <input type="text" name="UnitPrice[]" class = "form-control" value=@ViewBag.OrderDetail[i].UnitPrice />
+                            <input type="text" name="UnitPrice[]" class = "form-control" value=@ViewBag.OrderDetail[i].UnitPrice onchange="cultotal()" />
                         </td>
                         <td>
-                            <input type="text" name="Qty[]" class="form-control" value=@ViewBag.OrderDetail[i].Qty />
+                            <input type="text" name="Qty[]" class="form-control" value=@ViewBag.OrderDetail[i].Qty onchange="cultotal()" />
                         </td>
                         <td>
-                            <input type="text" name="Discount[]" class="form-control" value=@ViewBag.OrderDetail[i].Discount />
+                            <input type="text" name="Discount[]" class="form-control" value=@ViewBag.OrderDetail[i].Discount onchange="cultotal()" />
                         </td>
                     </tr>
                 }
             </table>
         </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
+        <div id="total">
+            訂單金額：@ViewBag.Total
         </div>
     </div>
 }
 
+<div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+        <!--<input type="submit" id="textSubmit" value="Save" class="btn btn-default" />-->
+        <button id="Submit" class="btn btn-default">Save</button>
+    </div>
+</div>
+
+<div>
+    <button onclick="add()">新增商品</button>
+    <button onclick="deltr()">刪除商品</button>
+</div>
+
+<script>
+    /*
+        Discount 輸入格式 整數位只可為 0 or 1 , 小數位必須為 3 位 , 整個數字不得超過 1.000
+    */
+    var DiscountCheck = true; // true 為 Discount 符合格式 , false 為 Discount 不符合格式
+    var option = "<option value=1>Product HHYDP</option><option value=2>Product RECZE</option><option value=3>Product IMEHJ</option><option value=4>Product KSBRM</option><option value=5>Product EPEIM</option><option value=6>Product VAIIV</option><option value=7>Product HMLNI</option><option value=8>Product WVJFP</option><option value=9>Product AOZBW</option><option value=10>Product YHXGE</option><option value=11>Product QMVUN</option><option value=12>Product OSFNS</option><option value=13>Product POXFU</option><option value=14>Product PWCJB</option><option value=15>Product KSZOI</option><option value=16>Product PAFRH</option><option value=17>Product BLCAX</option><option value=18>Product CKEDC</option><option value=19>Product XKXDO</option><option value=20>Product QHFFP</option><option value=21>Product VJZZH</option><option value=22>Product CPHFY</option><option value=23>Product JLUDZ</option><option value=24>Product QOGNU</option><option value=25>Product LYLNI</option><option value=26>Product HLGZA</option><option value=27>Product SMIOH</option><option value=28>Product OFBNT</option><option value=29>Product VJXYN</option><option value=30>Product LYERX</option><option value=31>Product XWOXC</option><option value=32>Product NUNAW</option><option value=33>Product ASTMN</option><option value=34>Product SWNJY</option><option value=35>Product NEVTJ</option><option value=36>Product GMKIJ</option><option value=37>Product EVFFA</option><option value=38>Product QDOMO</option><option value=39>Product LSOFL</option><option value=40>Product YZIXQ</option><option value=41>Product TTEEX</option><option value=42>Product RJVNM</option><option value=43>Product ZZZHR</option><option value=44>Product VJIEO</option><option value=45>Product AQOKR</option><option value=46>Product CBRRL</option><option value=47>Product EZZPR</option><option value=48>Product MYNXN</option><option value=49>Product FPYPN</option><option value=50>Product BIUDV</option><option value=51>Product APITJ</option><option value=52>Product QSRXF</option><option value=53>Product BKGEA</option><option value=54>Product QAQRL</option><option value=55>Product YYWRT</option><option value=56>Product VKCMF</option><option value=57>Product OVLQI</option><option value=58>Product ACRVI</option><option value=59>Product UKXRI</option><option value=60>Product WHBYK</option><option value=61>Product XYZPE</option><option value=62>Product WUXYK</option><option value=63>Product ICKNK</option><option value=64>Product HCQDE</option><option value=65>Product XYWBZ</option><option value=66>Product LQMGN</option><option value=67>Product XLXQF</option><option value=68>Product TBTBL</option><option value=69>Product COAXA</option><option value=70>Product TOONT</option><option value=71>Product MYMOI</option><option value=72>Product GEEOO</option><option value=73>Product WEUJZ</option><option value=74>Product BKAZJ</option><option value=75>Product BWRLG</option><option value=76>Product JYGFE</option><option value=77>Product LUNZZ</option>";
+    function add() {
+        var text = "<tr><td>";
+        text += "<select name='ProductID[]'>";
+        text += option;
+        text += "</select></td>";
+        text += "<td><input type='text' name='UnitPrice[]' class='form-control'/></td>";
+        text += "<td><input type='text' name='Qty[]' class='form-control'/></td>";
+        text += "<td><input type='text' name='Discount[]' class='form-control'/></td>";
+        text += "</tr>";
+        $("#OrderDetail").append(text);
+    }
+    function deltr() {
+        $("#OrderDetail tr:last").remove();
+    }
+    //Bug
+    $('#Submit').click(function () {
+        //$('input[id^="Discount"]').each(function () { alert(this.value); });
+        $("form").submit();
+    });
+    
+</script>
+
 <div>
     @Html.ActionLink("回首頁", "Index")
 </div>
+

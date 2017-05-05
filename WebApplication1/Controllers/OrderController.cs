@@ -53,43 +53,10 @@ namespace WebApplication1.Controllers
         /// <param name="ShipCountry"></param>
         /// <returns></returns>
         [HttpPost()]
-        public ActionResult CreatOrder(string OrderID, string CustomerID, string EmployeeID, string CustomerName, DateTime OrderDate, DateTime RequireDate,
-                                       DateTime ShippedDate, string ShipperID, string Freight, string ShipName, string ShipAddres, string ShipCity, string ShipRegion, string ShipPostalCode, string ShipCountry)
+        public ActionResult CreatOrder(Models.Order order, string[] ProductID, string[] UnitPrice, string[] Qty, string[] Discount)
         {
-            Models.Class1 OrderDetail = new Models.Class1();
-            OrderDetail.CustomerID = CustomerID;
-            OrderDetail.EmployeeID = EmployeeID;
-            OrderDetail.OrderDate = OrderDate;
-            OrderDetail.RequireDate = RequireDate;
-            OrderDetail.ShippedDate = ShippedDate;
-            OrderDetail.ShipperID = ShipperID;
-            OrderDetail.Freight = Convert.ToDecimal(Freight);
-            OrderDetail.ShipName = ShipName;
-            OrderDetail.ShipAddres = ShipAddres;
-            OrderDetail.ShipCity = ShipCity;
-            OrderDetail.ShipRegion = ShipRegion;
-            OrderDetail.ShipPostalCode = ShipPostalCode;
-            OrderDetail.ShipCountry = ShipCountry;
-
             Models.OrderService orderservice = new Models.OrderService();
-            orderservice.InsertOrder(OrderDetail);
-
-
-            ViewBag.one = OrderID;
-            ViewBag.two = CustomerID;
-            ViewBag.three = EmployeeID;
-            ViewBag.four = CustomerName;
-            ViewBag.five = OrderDate;
-            ViewBag.six = RequireDate;
-            ViewBag.seven = ShippedDate;
-            ViewBag.eight = ShipperID;
-            ViewBag.nine = Freight;
-            ViewBag.ten = ShipName;
-            ViewBag.eleven = ShipAddres + " \r\n";
-            ViewBag.twelve = ShipRegion;
-            ViewBag.threeten = ShipPostalCode;
-            ViewBag.fourten = ShipCountry;
-
+            orderservice.InsertOrder(order,ProductID,UnitPrice,Qty,Discount);
             return View();
         }
 
@@ -99,7 +66,7 @@ namespace WebApplication1.Controllers
         /// <param name="button"></param>
         /// <returns></returns>
         [HttpPost()]
-        public ActionResult GetOrderByCondition(Models.Class1 order)
+        public ActionResult GetOrderByCondition(Models.Order order)
         {
             Models.OrderService orderService = new Models.OrderService();
             //有空格的字放到value裡會讓value的值只取到前面 所以暫時先這樣做
@@ -128,6 +95,7 @@ namespace WebApplication1.Controllers
         [HttpPost()]
         public ActionResult DeleteOrder(string OrderID)
         {
+            OrderID = OrderID.Replace("/","");
             Models.OrderService orderService = new Models.OrderService();
             orderService.DeleteOrderByID(OrderID);
             return View();
@@ -135,7 +103,7 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost()]
-        public ActionResult UpdateOrder(Models.Class1 order,string[] ProductID,string[] UnitPrice , string[] Qty, string[] Discount)
+        public ActionResult UpdateOrder(Models.Order order,string[] ProductID,string[] UnitPrice , string[] Qty, string[] Discount)
         {
             Models.OrderService orderService = new Models.OrderService();
             orderService.UpdateOrder(order.OrderID, order,ProductID,UnitPrice,Qty,Discount);
@@ -168,15 +136,36 @@ namespace WebApplication1.Controllers
             ViewBag.RequireDate = convertDate(Date[0]);
             Date = (ViewBag.Order.ShippedDate + "").Split(' ');
             ViewBag.ShippedDate = convertDate(Date[0]);
+            //訂單金額
+            ViewBag.Total = 0;
+            for (int i =0;i<ViewBag.OrderDetail.Count;i++)
+            {
+                if (ViewBag.OrderDetail[i].Discount != 0)
+                {
+                    ViewBag.Total += (ViewBag.OrderDetail[i].Qty * ViewBag.OrderDetail[i].UnitPrice) * ViewBag.OrderDetail[i].Discount;
+                }else
+                {
+                    ViewBag.Total += (ViewBag.OrderDetail[i].Qty * ViewBag.OrderDetail[i].UnitPrice);
+                }
+            }
             return View();
         }
-
+        /// <summary>
+        /// 排序
+        /// </summary>
+        /// <param name="OrderID"></param>
+        /// <param name="CustomerName"></param>
+        /// <param name="EmployeeName"></param>
+        /// <param name="ShipperName"></param>
+        /// <param name="OrderDate"></param>
+        /// <param name="ShippedDate"></param>
+        /// <param name="RequireDate"></param>
+        /// <returns></returns>
         [HttpPost()]
         public JsonResult AjaxMethod(string OrderID, string CustomerName, string EmployeeName, string ShipperName, string OrderDate, string ShippedDate, string RequireDate)
         {
-            DateTime datetime;
             Models.OrderService orderService = new Models.OrderService();
-            Models.Class1 order = new Models.Class1();
+            Models.Order order = new Models.Order();
             order.OrderID = OrderID;
             order.CustomerName = CustomerName;
             order.EmployeeName = EmployeeName;
@@ -203,7 +192,7 @@ namespace WebApplication1.Controllers
             {
                 order.RequireDate = null;
             }
-            List<Models.Class1> data = orderService.AjaxGetOrderByCondition(order,"ASC");
+            List<Models.Order> data = orderService.AjaxGetOrderByCondition(order,"ASC");
             var jsonData = Json(data, JsonRequestBehavior.AllowGet);
             return jsonData;
         }
