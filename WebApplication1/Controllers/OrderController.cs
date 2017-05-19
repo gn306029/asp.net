@@ -87,6 +87,26 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+        [HttpPost()]
+        public JsonResult GetOrderByCondition_Ajax(Models.Order order)
+        {
+            Models.OrderService orderService = new Models.OrderService();
+            try
+            {
+                string[] shipperName = order.ShipperName.Split(' ');
+                ViewBag.First_shipperName = shipperName[0];
+                ViewBag.Second_shipperName = shipperName[1];
+            }
+            catch (Exception e)
+            {
+                ViewBag.First_shipperName = "S";
+                ViewBag.Second_shipperName = " ";
+            }
+            List<Models.Order> result = orderService.GetOrderByCondition(order);
+            var jsonData = Json(result, JsonRequestBehavior.AllowGet);
+            return jsonData;
+        }
+
         /// <summary>
         /// 依 OrderID 刪除訂單
         /// </summary>

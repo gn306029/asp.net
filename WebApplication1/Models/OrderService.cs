@@ -503,13 +503,6 @@ namespace WebApplication1.Models
                 cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate == null ? "" : order.OrderDate + ""));
                 cmd.Parameters.Add(new SqlParameter("@RequireDate", order.RequireDate == null ? "" : order.RequireDate + ""));
                 cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate == null ? "" : order.ShippedDate + ""));
-                /*cmd.Parameters.Add(new SqlParameter("@OrderId", order.OrderID));
-                cmd.Parameters.Add(new SqlParameter("@CustomerName", order.CustomerName == null ? "%%" : "%"+order.CustomerName+"%"));
-                cmd.Parameters.Add(new SqlParameter("@EmployeeName", order.EmployeeName));
-                cmd.Parameters.Add(new SqlParameter("@ShipperName", order.ShipperName));
-                cmd.Parameters.Add(new SqlParameter("@OrderDate", order.OrderDate== null ? "%%" : "%"+order.OrderDate+"%"));
-                cmd.Parameters.Add(new SqlParameter("@RequireDate", order.RequireDate == null ? "%%" : "%"+order.RequireDate+"%"));
-                cmd.Parameters.Add(new SqlParameter("@ShippedDate", order.ShippedDate == null ? "%%" : "%"+order.ShippedDate+"%"));*/
                 SqlDataAdapter sqlAdapter = new SqlDataAdapter(cmd);
                 sqlAdapter.Fill(dt);
                 conn.Close();

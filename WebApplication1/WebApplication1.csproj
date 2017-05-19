@@ -294,6 +294,8 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Areas\Emp\Models\" />
+    <Folder Include="Content\js\" />
+    <Folder Include="Content\styles\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

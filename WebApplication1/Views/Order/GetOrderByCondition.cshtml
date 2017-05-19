@@ -1,29 +1,12 @@
 ﻿@model WebApplication1.Models.IndexViewModel
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.2.504/styles/kendo.common.min.css" />
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.2.504/styles/kendo.blueopal.min.css" />
+
+<script src="http://kendo.cdn.telerik.com/2017.2.504/js/jquery.min.js"></script>
+
 
 @ViewBag.Error
-<!--
-public String OrderID { get; set; }
-        /// <summary>
-        /// 客戶代號
-        /// </summary>
-        public String CustomerID { get; set; }
-        public String EmployeeID { get; set; }
-        public String CustomerName { get; set; }
-        public String EmployeeName { get; set; }
-        public DateTime? OrderDate { get; set; }
-        public DateTime? RequireDate { get; set; }
-        public DateTime? ShippedDate { get; set; }
-        public String ShipperID { get; set; }
-        public String ShipperName { get; set; }
-        public Decimal Freight { get; set; }
-        public String ShipName { get; set; }
-        public String ShipAddres { get; set; }
-        public String ShipCity { get; set; }
-        public String ShipRegion { get; set; }
-        public String ShipPostalCode { get; set; }
-        public String ShipCountry { get; set; }
--->
+
 <div id="content">
     <table class="table table-striped">
         <tr><td id="OrderID_table">訂單編號</td><td id="CustomerName">客戶姓名</td><td id="EmployeeName">負責員工</td><td id="OrderDate">訂購日期</td><td id="RequireDate">需要日期</td><td id="ShipperDate">出貨日期</td><td></td><td></td></tr>

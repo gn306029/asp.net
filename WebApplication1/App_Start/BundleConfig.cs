@@ -26,6 +26,10 @@ namespace WebApplication1
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+            bundles.Add(new StyleBundle("~/Content/styles/").Include(
+                      "~/Content/styles-*"));
+            bundles.Add(new StyleBundle("~/Content/js/").Include(
+                      "~/Content/js-*"));
         }
     }
 }

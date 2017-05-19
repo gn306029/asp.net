@@ -2,7 +2,13 @@
 @{
     ViewBag.Title = "Index";
 }
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+<link rel="stylesheet" href="~/Content/styles/kendo.common.min.css" />
+<link rel="stylesheet" href="~/Content/styles/kendo.default.min.css" />
+<link rel="stylesheet" href="~/Content/styles/kendo.default.mobile.min.css" />
+
+<script src="~/Content/js/jquery.min.js"></script>
+<script src="~/Content/js/kendo.all.min.js"></script>
 <h2>Index</h2>
 
 <div>訂單編號</div>
@@ -35,10 +41,123 @@
     <input type="submit" id="search" value="查詢" />
 
 }
+<form id="condition" action="/Order/GetOrderByCondition_Ajax" method="POST">
+    @Html.AntiForgeryToken()
 
+    @Html.EditorFor(model => model.OrderID, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessageFor(model => model.OrderID)
+    <div>客戶名稱</div>
+    @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessageFor(model => model.CustomerName)
+    <div>負責員工</div>
+    @Html.DropDownList("EmployeeName", ViewBag.Employee_name as SelectList)
+    @Html.ValidationMessageFor(model => model.EmployeeName)
+    <div>貨運公司</div>
+    @Html.DropDownList("ShipperName", ViewBag.Shipper as SelectList)
+    @Html.ValidationMessageFor(model => model.ShipName)
+    <div>訂購日期</div>
+    @Html.EditorFor(model => model.OrderDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.OrderDate)
+    <div>出貨日期</div>
+    @Html.EditorFor(model => model.ShippedDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.ShippedDate)
+    <div>需求名稱</div>
+    @Html.EditorFor(model => model.RequireDate, new { htmlAttributes = new { @class = "form-control", @type = "Date" } })
+    @Html.ValidationMessageFor(model => model.RequireDate)
+</form>
+<button id="search_by_condition">查詢</button>
 @using (Html.BeginForm("InsertOrder", "Order"))
 {
     <input type="submit" value="新增訂單" />
 }
 
-<div id="content"></div>
+<script id="template" type="text/x-kendo-template">
+    <tr>
+        <td>#= OrderID #</td>
+        <td>#= CustomerName #</td>
+        <td>#= EmployeeName #</td>
+        <td>#= OrderDate #</td>
+        <td>#= RequireDate #</td>
+        <td>#= ShippedDate #</td>
+    </tr>
+</script>
+
+<div id="content">
+    <table id="grid">
+
+    </table>
+</div>
+
+<script type="text/javascript">
+    function test(){
+        window.location = "www.google.com.tw";
+    }
+    $(function () {
+        $("#search_by_condition").click(function () {
+            $.ajax({
+                url: "/Order/GetOrderByCondition_Ajax",
+                data: $("#condition").serialize(),
+                type: "post",
+                success: function (output) {
+                    var data = new kendo.data.DataSource({
+                        data: output,
+                        schema: {
+                            model: {
+                                fields: {
+                                    OrderID: { type: "number" },
+                                    CustomerName: { type: "string" },
+                                    EmployeeName: { type: "string" },
+                                    OrderDate: { type: "date" },
+                                    RequireDate: { type: "date" },
+                                    ShippedDate: { type: "date" },
+                                }
+                            }
+                        },
+                        pageSize: 20
+                    })
+
+                    $("#grid").kendoGrid({
+                        
+                        dataSource: data,
+                        height: 550,
+                        groupable: true,
+                        sortable: true,
+                        pageable: {
+                            refresh: true,
+                            pageSizes: true,
+                            buttonCount: 5
+                        },
+                        columns: [{
+                            field: "OrderID",
+                            title: "訂單編號"
+                        }, {
+                            field: "CustomerName",
+                            title: "客戶名稱"
+                        }, {
+                            field: "EmployeeName",
+                            title: "員工編號"
+                        }, {
+                            field: "OrderDate",
+                            title: "訂購日期",
+                            format: "{0:yyyy 年 MM 月 dd 日}"
+                        }, {
+                            field: "RequireDate",
+                            title: "需要日期",
+                            format: "{0:yyyy 年 MM 月 dd 日}"
+                        }, {
+                            field: "ShippedDate",
+                            title: "出貨日期",
+                            format: "{0:yyyy 年 MM 月 dd 日}"
+                        }, {
+                            command: { text: "更新", click: test },
+                            title: "",
+                            width:"150px"
+                        }]
+                    })
+                }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.responseText);
+                }
+           })
+        })
+    });
+</script>
